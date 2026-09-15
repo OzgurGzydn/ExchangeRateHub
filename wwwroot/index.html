@@ -1,0 +1,632 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExchangeRateHub</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial,Helvetica,sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,.08);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #0d6efd;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 18px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0d6efd;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #0d6efd;
+            color: white;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-top: 6px;
+        }
+
+            button:hover {
+                background: #0b5ed7;
+            }
+
+        .navbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+            .navbar button {
+                background: white;
+                color: #222;
+                border: 1px solid #ddd;
+            }
+
+                .navbar button:hover {
+                    background: #0d6efd;
+                    color: white;
+                }
+
+        .link {
+            color: #0d6efd;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .rate-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+            gap: 15px;
+        }
+
+        .rate-box {
+            background: #eef3ff;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .wallet-box {
+            background: #eef3ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .favorite-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #eef3ff;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            color: green;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .danger {
+            background: #dc3545;
+        }
+
+            .danger:hover {
+                background: #bb2d3b;
+            }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        canvas {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        .dark body {
+            background: #121212;
+            color: white;
+        }
+
+        .dark .card {
+            background: #1e1e1e;
+            color: white;
+        }
+
+        .dark h1 {
+            color: #4da3ff;
+        }
+
+        .dark h2 {
+            color: white;
+            border-bottom: 2px solid #4da3ff;
+        }
+
+        .dark input, .dark select {
+            background: #2c2c2c;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        .dark .navbar button {
+            background: #2c2c2c;
+            color: white;
+            border: 1px solid #555;
+        }
+
+            .dark .navbar button:hover {
+                background: #0d6efd;
+                color: white;
+            }
+
+        .dark .rate-box, .dark .wallet-box, .dark .favorite-item, .dark .history-item {
+            background: #2b2b2b;
+            color: white;
+        }
+
+        .dark canvas {
+            background: #1b1b1b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div id="loginPage" class="card">
+            <h1>ExchangeRateHub</h1>
+            <h2>Login</h2>
+            <input id="loginUser" placeholder="Username" value="burak">
+            <input id="loginPass" type="password" placeholder="Password" value="1234">
+            <button onclick="login()">Login</button>
+            <p style="margin-top:15px;">Don't have an account? <span class="link" onclick="showRegister()">Register</span></p>
+            <p id="loginMsg" class="error"></p>
+        </div>
+
+        <div id="registerPage" class="card hidden">
+            <h1>ExchangeRateHub</h1>
+            <h2>Register</h2>
+            <input id="regUser" placeholder="Username">
+            <input id="regPass" type="password" placeholder="Password">
+            <button onclick="register()">Register</button>
+            <p style="margin-top:15px;">Already have an account? <span class="link" onclick="showLogin()">Login</span></p>
+            <p id="regMsg"></p>
+        </div>
+
+        <div id="dashboard" class="hidden">
+
+            <div class="card">
+                <h1>Dashboard</h1>
+                <div class="navbar">
+                    <button onclick="showSection('ratesSection')">Live Rates</button>
+                    <button onclick="showSection('convertSection')">Convert</button>
+                    <button onclick="showSection('favoritesSection')">Favorites</button>
+                    <button onclick="showSection('walletSection')">Wallet</button>
+                    <button onclick="toggleDarkMode()">🌙 Dark Mode</button>
+                    <button onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+            <div id="ratesSection" class="card">
+                <h2>Important Currency Rates</h2>
+                <button onclick="getRates()">Refresh</button>
+                <canvas id="ratesChart" height="120" style="width:100%; margin:20px 0;"></canvas>
+                <div id="ratesList" class="rate-grid"></div>
+            </div>
+
+            <div id="convertSection" class="card hidden">
+                <h2>Convert Currency</h2>
+                <select id="fromCurrency"></select>
+                <select id="toCurrency"></select>
+                <input id="convertAmount" placeholder="Amount" value="100">
+                <button onclick="convertCurrency()">Convert</button>
+                <p id="convertResult" class="success"></p>
+            </div>
+
+            <div id="favoritesSection" class="card hidden">
+                <h2>Favorites</h2>
+                <select id="favCurrency"></select>
+                <button onclick="addFavorite()">Add Favorite</button>
+                <button onclick="getFavorites()">Show Favorites</button>
+                <div id="favList" style="margin-top:15px;"></div>
+            </div>
+
+            <div id="walletSection" class="card hidden">
+                <h2>Wallet</h2>
+                <div id="walletBalances"></div>
+
+                <h3 style="margin-top:20px;">Deposit Money</h3>
+                <select id="depositCurrency"></select>
+                <input id="depositAmount" placeholder="Amount">
+                <button onclick="depositMoney()">Deposit</button>
+
+                <h3 style="margin-top:20px;">Exchange Wallet Balance</h3>
+                <select id="walletFrom"></select>
+                <select id="walletTo"></select>
+                <input id="walletAmount" placeholder="Amount">
+                <button onclick="walletExchange()">Exchange</button>
+                <p id="walletMsg" class="success"></p>
+
+                <h3 style="margin-top:25px;">Transaction History</h3>
+                <button onclick="loadHistory()">Refresh History</button>
+                <div id="transactionHistory" style="margin-top:15px;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const api = "https://localhost:7220/api";
+        let token = localStorage.getItem("token");
+
+        const currencies = [
+            "EUR", "USD", "TRY", "PLN", "GBP", "JPY", "CHF", "CAD", "AUD", "CNY", "CZK", "SEK", "NOK", "DKK", "HUF"
+        ];
+
+        function fillSelect(id) {
+            let s = document.getElementById(id);
+            s.innerHTML = "";
+            currencies.forEach(x => s.innerHTML += `<option value="${x}">${x}</option>`);
+        }
+
+        ["fromCurrency", "toCurrency", "favCurrency", "depositCurrency", "walletFrom", "walletTo"].forEach(fillSelect);
+
+        function showRegister() {
+            loginPage.classList.add("hidden");
+            registerPage.classList.remove("hidden");
+        }
+
+        function showLogin() {
+            registerPage.classList.add("hidden");
+            loginPage.classList.remove("hidden");
+        }
+
+        function showDashboard() {
+            loginPage.classList.add("hidden");
+            registerPage.classList.add("hidden");
+            dashboard.classList.remove("hidden");
+            getRates();
+            getFavorites();
+            loadWallet();
+            loadHistory();
+        }
+
+        function showSection(id) {
+            ["ratesSection", "convertSection", "favoritesSection", "walletSection"]
+                .forEach(x => document.getElementById(x).classList.add("hidden"));
+
+            document.getElementById(id).classList.remove("hidden");
+
+            if (id === "favoritesSection") getFavorites();
+            if (id === "walletSection") {
+                loadWallet();
+                loadHistory();
+            }
+        }
+
+        async function register() {
+            let username = regUser.value;
+            let password = regPass.value;
+
+            let res = await fetch(api + "/Auth/register", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            regMsg.innerText = await res.text();
+
+            if (res.ok) setTimeout(showLogin, 800);
+        }
+
+        async function login() {
+            let username = loginUser.value;
+            let password = loginPass.value;
+
+            let res = await fetch(api + "/Auth/login", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!res.ok) {
+                loginMsg.innerText = "Login failed";
+                return;
+            }
+
+            let data = await res.json();
+            token = data.token;
+            localStorage.setItem("token", token);
+            showDashboard();
+        }
+
+        function logout() {
+            localStorage.removeItem("token");
+            location.reload();
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle("dark");
+            localStorage.setItem("darkmode", document.documentElement.classList.contains("dark"));
+        }
+
+        if (localStorage.getItem("darkmode") === "true") {
+            document.documentElement.classList.add("dark");
+        }
+
+        async function getRates() {
+            let res = await fetch(api + "/Exchange/rates");
+            let data = await res.json();
+
+            ratesList.innerHTML = "";
+
+            const important = ["EUR", "USD", "TRY", "PLN", "GBP", "JPY", "CHF", "CAD", "AUD", "CNY"];
+            let chartData = [];
+
+            important.forEach(code => {
+                let found = data.find(x => x.currency === code);
+                let rateValue = code === "EUR" ? 1 : (found ? found.rate : null);
+
+                if (rateValue !== null) {
+                    chartData.push({ currency: code, rate: rateValue });
+
+                    ratesList.innerHTML += `
+<div class="rate-box">
+<h3>${code}</h3>
+<p>${rateValue}</p>
+</div>`;
+                }
+            });
+
+            drawChart(chartData);
+        }
+
+        function drawChart(data) {
+            const canvas = document.getElementById("ratesChart");
+            const ctx = canvas.getContext("2d");
+
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 260;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const padding = 40;
+            const chartWidth = canvas.width - padding * 2;
+            const chartHeight = canvas.height - padding * 2;
+
+            const maxRate = Math.max(...data.map(x => x.rate));
+
+            ctx.font = "14px Arial";
+            ctx.fillStyle = document.documentElement.classList.contains("dark") ? "#fff" : "#222";
+
+            data.forEach((item, index) => {
+                const barWidth = chartWidth / data.length - 12;
+                const x = padding + index * (chartWidth / data.length);
+                const barHeight = (item.rate / maxRate) * chartHeight;
+                const y = canvas.height - padding - barHeight;
+
+                ctx.fillStyle = "#0d6efd";
+                ctx.beginPath();
+
+                if (ctx.roundRect) {
+                    ctx.roundRect(x, y, barWidth, barHeight, 8);
+                } else {
+                    ctx.rect(x, y, barWidth, barHeight);
+                }
+
+                ctx.fill();
+
+                ctx.fillStyle = document.documentElement.classList.contains("dark") ? "#fff" : "#222";
+                ctx.textAlign = "center";
+                ctx.fillText(item.currency, x + barWidth / 2, canvas.height - 15);
+
+                ctx.fillStyle = "#4da3ff";
+                ctx.fillText(item.rate.toFixed(2), x + barWidth / 2, y - 8);
+            });
+
+            ctx.strokeStyle = document.documentElement.classList.contains("dark") ? "#555" : "#ddd";
+            ctx.beginPath();
+            ctx.moveTo(padding, canvas.height - padding);
+            ctx.lineTo(canvas.width - padding, canvas.height - padding);
+            ctx.stroke();
+        }
+
+        async function convertCurrency() {
+            let from = fromCurrency.value;
+            let to = toCurrency.value;
+            let amount = convertAmount.value;
+
+            let res = await fetch(api + "/Exchange/convert?from=" + from + "&to=" + to + "&amount=" + amount);
+            let data = await res.json();
+
+            convertResult.innerText = amount + " " + from + " = " + data.rates[to] + " " + to;
+        }
+
+        async function addFavorite() {
+            await fetch(api + "/Favorites", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ currency: favCurrency.value })
+            });
+
+            getFavorites();
+        }
+
+        async function getFavorites() {
+            let favRes = await fetch(api + "/Favorites", {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (!favRes.ok) {
+                favList.innerHTML = "<p class='error'>Please login first.</p>";
+                return;
+            }
+
+            let favorites = await favRes.json();
+
+            let rateRes = await fetch(api + "/Exchange/rates");
+            let rates = await rateRes.json();
+
+            favList.innerHTML = "";
+
+            if (favorites.length === 0) {
+                favList.innerHTML = "<p>No favorites added yet.</p>";
+                return;
+            }
+
+            favorites.forEach(fav => {
+                let rateInfo = rates.find(x => x.currency === fav.currency);
+                let rateValue = fav.currency === "EUR" ? 1 : (rateInfo ? rateInfo.rate : "N/A");
+
+                favList.innerHTML += `
+<div class="favorite-item">
+<span>⭐ ${fav.currency} — Rate: ${rateValue}</span>
+<button class="danger" onclick="deleteFavorite(${fav.id})">Delete</button>
+</div>
+`;
+            });
+        }
+
+        async function deleteFavorite(id) {
+            await fetch(api + "/Favorites/" + id, {
+                method: "DELETE",
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            getFavorites();
+        }
+
+        async function loadWallet() {
+            let res = await fetch(api + "/Wallet", {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (!res.ok) {
+                walletBalances.innerHTML = "<p class='error'>Please login first.</p>";
+                return;
+            }
+
+            let data = await res.json();
+            walletBalances.innerHTML = "";
+
+            if (data.length === 0) {
+                walletBalances.innerHTML = "<p>No balance yet.</p>";
+                return;
+            }
+
+            data.forEach(x => {
+                walletBalances.innerHTML += `
+<div class="wallet-box">
+<strong>${x.currency}</strong>: ${x.amount}
+</div>
+`;
+            });
+        }
+
+        async function depositMoney() {
+            await fetch(api + "/Wallet/deposit", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    currency: depositCurrency.value,
+                    amount: Number(depositAmount.value)
+                })
+            });
+
+            loadWallet();
+            loadHistory();
+        }
+
+        async function walletExchange() {
+            let res = await fetch(api + "/Wallet/exchange", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    fromCurrency: walletFrom.value,
+                    toCurrency: walletTo.value,
+                    amount: Number(walletAmount.value)
+                })
+            });
+
+            let data = await res.json();
+            walletMsg.innerText = data.message || "Exchange failed.";
+
+            loadWallet();
+            loadHistory();
+        }
+
+        async function loadHistory() {
+            let res = await fetch(api + "/Wallet/history", {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (!res.ok) {
+                transactionHistory.innerHTML = "<p class='error'>Please login first.</p>";
+                return;
+            }
+
+            let data = await res.json();
+            transactionHistory.innerHTML = "";
+
+            if (data.length === 0) {
+                transactionHistory.innerHTML = "<p>No transactions yet.</p>";
+                return;
+            }
+
+            data.slice().reverse().forEach(item => {
+                transactionHistory.innerHTML += `
+<div class="history-item">
+${item}
+</div>
+`;
+            });
+        }
+
+        if (token) showDashboard();
+    </script>
+
+</body>
+</html>
